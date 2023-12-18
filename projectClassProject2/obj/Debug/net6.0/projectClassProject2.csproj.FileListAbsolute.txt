@@ -1,0 +1,14 @@
+D:\LabProjects\projectClassProject2\projectClassProject2\bin\Debug\net6.0\projectClassProject2.exe
+D:\LabProjects\projectClassProject2\projectClassProject2\bin\Debug\net6.0\projectClassProject2.deps.json
+D:\LabProjects\projectClassProject2\projectClassProject2\bin\Debug\net6.0\projectClassProject2.runtimeconfig.json
+D:\LabProjects\projectClassProject2\projectClassProject2\bin\Debug\net6.0\projectClassProject2.dll
+D:\LabProjects\projectClassProject2\projectClassProject2\bin\Debug\net6.0\projectClassProject2.pdb
+D:\LabProjects\projectClassProject2\projectClassProject2\obj\Debug\net6.0\projectClassProject2.GeneratedMSBuildEditorConfig.editorconfig
+D:\LabProjects\projectClassProject2\projectClassProject2\obj\Debug\net6.0\projectClassProject2.AssemblyInfoInputs.cache
+D:\LabProjects\projectClassProject2\projectClassProject2\obj\Debug\net6.0\projectClassProject2.AssemblyInfo.cs
+D:\LabProjects\projectClassProject2\projectClassProject2\obj\Debug\net6.0\projectClassProject2.csproj.CoreCompileInputs.cache
+D:\LabProjects\projectClassProject2\projectClassProject2\obj\Debug\net6.0\projectClassProject2.dll
+D:\LabProjects\projectClassProject2\projectClassProject2\obj\Debug\net6.0\refint\projectClassProject2.dll
+D:\LabProjects\projectClassProject2\projectClassProject2\obj\Debug\net6.0\projectClassProject2.pdb
+D:\LabProjects\projectClassProject2\projectClassProject2\obj\Debug\net6.0\projectClassProject2.genruntimeconfig.cache
+D:\LabProjects\projectClassProject2\projectClassProject2\obj\Debug\net6.0\ref\projectClassProject2.dll
