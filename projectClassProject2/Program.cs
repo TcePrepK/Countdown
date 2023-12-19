@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.Design.Serialization;
+﻿using System.Buffers.Text;
+using System.ComponentModel.Design.Serialization;
 using System.Diagnostics;
 using static Program.Program;
 
@@ -11,7 +12,9 @@ namespace Program
         
         // Visual Variables
         public static int leftPadding = 2;
-        public static int topPadding = 7;
+        public static int topPadding = 1; // 7
+        public static int statsLeftPadding = 1;
+        public static int statsTopPadding = 1;
         public static bool isFancy = true;
 
         // Game Variables
@@ -20,6 +23,7 @@ namespace Program
             public int x;
             public int y;
             public int life;
+            public int score;
         }
 
         public struct ScoreNumber
@@ -155,6 +159,8 @@ namespace Program
             }
 
             // Finally, Put The Player
+            player.life = 5;
+            player.score = 0;
             do
             {
                 player.x = rng.Next(1, gridWidth - 1);
@@ -219,7 +225,7 @@ namespace Program
                             }
                         }
 
-                        writeAt(x, y, Convert.ToChar('0' + val));
+                        setGrid(x, y, Convert.ToChar(val + '0'));
                     }
 
                     numberDecreaseTimer = currentTime;
@@ -254,8 +260,7 @@ namespace Program
                                     }
                                 }
 
-                                grid[y, x] = ' ';
-                                writeAt(x, y, ' ');
+                                setGrid(x, y, ' ');
                                 switch (randomSide)
                                 {
                                     case 0:
@@ -272,7 +277,7 @@ namespace Program
                                         break;
                                 }
 
-                                if (grid[y, x] == 'P')
+                                if (isPlayer(x, y))
                                 {
                                     // 0 Moved over P
                                     player.life--;
@@ -295,10 +300,9 @@ namespace Program
                                     }
                                 }
 
-                                grid[y, x] = '0';
+                                setGrid(x, y, '0');
                                 numbers[i].x = x;
                                 numbers[i].y = y;
-                                writeAt(x, y, '0');
                             }
                         }
                     }
@@ -393,101 +397,132 @@ namespace Program
 
         public static void tryToMove(int dx, int dy)
         {
-            int newX = player.x + dx;
-            int newY = player.y + dy;
-            if (isEmpty(newX, newY))
-            {
-                // Empty tile, just move.
-                setGrid(player.x, player.y, ' ');
-                setGrid(newX, newY, 'P');
-                player.x = newX;
-                player.y = newY;
-            }
-            else if (isNumber(newX, newY))
+            int targetX = player.x + dx;
+            int targetY = player.y + dy;
+            if (isNumber(targetX, targetY))
             {
                 // It's a number, try to push.
-                bool crushed = push(newX, newY, dx, dy, 10);
-                if (crushed)
+                bool moved = push(targetX, targetY, dx, dy, 10);
+                if (moved)
                 {
                     setGrid(player.x, player.y, ' ');
-                    setGrid(newX, newY, 'P');
-                    player.x = newX;
-                    player.y = newY;
+                    setGrid(targetX, targetY, 'P');
+                    player.x = targetX;
+                    player.y = targetY;
                 }
+            } else if (isEmpty(targetX, targetY))
+            {
+                setGrid(player.x, player.y, ' ');
+                setGrid(targetX, targetY, 'P');
+                player.x = targetX;
+                player.y = targetY;
             }
         }
 
-        public static bool push(int newX, int newY, int dx, int dy, int prevVal)
+        public static bool push(int baseX, int baseY, int dx, int dy, int prevVal)
         {
-            char targetChar = grid[newY, newX];
-            if (isNumber(newX, newY))
+            char currentChar = grid[baseY, baseX];
+            int targetX = baseX + dx;
+            int targetY = baseY + dy;
+
+            if (isNumber(targetX, targetY))
             {
-                int currVal = targetChar - '0';
-
-                // Test prev numbers.
-                if (currVal > prevVal)
+                // Next tile is a number, push.
+                int currentVal = currentChar - '0';
+                int targetVal = grid[targetY, targetX] - '0';
+                if (currentVal >= targetVal)
                 {
-                    return false;
-                }
-
-                bool crushed = push(newX + dx, newY + dy, dx, dy, currVal);
-                if (crushed)
-                {
-                    // Find the number from the list and update its position.
-                    int prevX = newX - dx;
-                    int prevY = newY - dy;
-                    for (int i = 0; i < numberAmount; i++)
+                    // Either the first number to get pushed or the small one.
+                    bool moved = push(targetX, targetY, dx, dy, currentVal);
+                    if (moved)
                     {
-                        if (numbers[i].x == prevX && numbers[i].y == prevY)
+                        for (int i = 0; i < numberAmount; i++)
                         {
-                            numbers[i].x = newX;
-                            numbers[i].y = newY;
+                            if (numbers[i].x == baseX && numbers[i].y == baseY)
+                            {
+                                numbers[i].x = targetX;
+                                numbers[i].y = targetY;
+                                break;
+                            }
                         }
-                    }
-                    setGrid(prevX, prevY, ' '); // Set current position empty.
-                    setGrid(newX, newY, Convert.ToChar(currVal + '0')); // Set next position current value.
+                        setGrid(baseX, baseY, ' '); // Set current position empty.
+                        setGrid(targetX, targetY, currentChar); // Set next position current value.
 
-                    return true;
+                        return true;
+                    } else
+                    {
+                        return false;
+                    }
                 } else
                 {
                     return false;
                 }
-            } else if (isWall(newX, newY))
+            } else if (isEmpty(targetX, targetY))
             {
-                // Hit the wall. Test for prev number, smash if needed.
-                if (prevVal < 10)
+                // Next tile is empty, move.
+                for (int i = 0; i < numberAmount; i++)
                 {
-                    // Crush
-                    int prevX = newX - dx;
-                    int prevY = newY - dy;
-                    for (int i = 0; i < numberAmount; i++)
+                    if (numbers[i].x == baseX && numbers[i].y == baseY)
                     {
-                        if (numbers[i].x == prevX && numbers[i].y == prevY && numbers[i].val == prevVal)
-                        {
-                            do
-                            {
-                                numbers[i].x = rng.Next(1, gridWidth - 1);
-                                numbers[i].y = rng.Next(1, gridHeight - 1);
-                            }
-                            while (!isEmpty(numbers[i].x, numbers[i].y));
-                            numbers[i].val = rng.Next(5, 10);
-
-                            setGrid(prevX, prevY, ' ');
-                            setGrid(numbers[i].x, numbers[i].y, Convert.ToChar(numbers[i].val + '0'));
-                            break;
-                        }
+                        numbers[i].x = targetX;
+                        numbers[i].y = targetY;
+                        break;
                     }
+                }
+                setGrid(baseX, baseY, ' '); // Set current position empty.
+                setGrid(targetX, targetY, currentChar); // Set next position current value.
 
+                return true;
+            } else
+            {
+                // Next tile is a wall, crush.
+                if (prevVal != 10)
+                {
+                    // Not the first number to get pushed.
+                    crushNumber(baseX, baseY);
                     return true;
                 } else
                 {
                     // First number to get pushed.
                     return false;
                 }
-            } else
+            }
+        }
+
+        public static void crushNumber(int x, int y)
+        {
+            for (int i = 0; i < numberAmount; i++)
             {
-                // Empty space. Just push without cruhsing.
-                return true;
+                // Find the number from numbers list.
+                if (numbers[i].x == x && numbers[i].y == y)
+                {
+                    do
+                    {
+                        numbers[i].x = rng.Next(1, gridWidth - 1);
+                        numbers[i].y = rng.Next(1, gridHeight - 1);
+                    }
+                    while (!isEmpty(numbers[i].x, numbers[i].y));
+
+                    int crushedValue = numbers[i].val;
+                    numbers[i].val = rng.Next(5, 10);
+
+                    setGrid(x, y, ' ');
+                    setGrid(numbers[i].x, numbers[i].y, Convert.ToChar(numbers[i].val + '0'));
+                    
+                    // Give score to the player depending on the number.
+                    if (crushedValue == 0)
+                    {
+                        player.score += 20;
+                    } else if (crushedValue < 5)
+                    {
+                        player.score += 2;
+                    } else
+                    {
+                        player.score += 1;
+                    }
+                    
+                    break;
+                }
             }
         }
     }
