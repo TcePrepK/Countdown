@@ -37,7 +37,7 @@ namespace Program
         }
 
         // Game State
-        public static string gameState = "running"; // (mainMenu, running, endScreen)
+        public static string gameState = "mainMenu"; // (mainMenu, running, endScreen)
 
         // Board Variables
         public static int gridWidth = 53;
@@ -51,11 +51,10 @@ namespace Program
         public static long playerTimer = Stopwatch.GetTimestamp() / TimeSpan.TicksPerMillisecond;
         public static long enemyTimer = Stopwatch.GetTimestamp() / TimeSpan.TicksPerMillisecond;
         public static long numberDecreaseTimer = Stopwatch.GetTimestamp() / TimeSpan.TicksPerMillisecond;
+        public static long gameTime = 0;
 
         static void Main(string[] args)
         {
-            Console.SetWindowSize(2 * gridWidth + leftPadding + statsLeftPadding + 20, gridHeight + topPadding + 1);
-
             // Console Visual Setup
             Console.CursorVisible = false;
             Console.ResetColor();
@@ -67,13 +66,36 @@ namespace Program
             Console.Clear();
 
             // Main Functions
-            startTheGame();
+            startMainMenu();
             mainGameLoop();
+        }
+
+        static void startMainMenu()
+        {
+            Console.SetWindowSize(100, 50);
+
+            int startX = 10;
+            int startY = 5;
+            int startWidth = 50;
+            int startHeight = 10;
+
+            for (int i = 0; i < startWidth; i++)
+            {
+                for (int j = 0; j < startHeight; j++)
+                {
+                    // Console.SetCursorPosition(i + startX, j + startY);
+                    // Console.Write(".");
+                }
+            }
+
+            // Console.SetCursorPosition(0, 0);
         }
 
         // This function sets up everything thats needed in this game. Such as walls, player and numbers.
         static void startTheGame()
         {
+            Console.SetWindowSize(2 * gridWidth + leftPadding + statsLeftPadding + 20, gridHeight + topPadding + 1);
+
             // Clear the grid by setting every tile to empty.
             for (int i = 0; i < gridWidth; i++)
             {
@@ -179,11 +201,6 @@ namespace Program
             }
             while (!isEmpty(player.x, player.y));
             setGrid(player.x, player.y, 'P');
-
-            // Render Stats
-            Console.ForegroundColor = ConsoleColor.Red;
-            writeAt(gridWidth + statsLeftPadding, statsTopPadding, "Life: ❤❤❤❤❤");
-            Console.ResetColor();
         }
 
         public static void mainGameLoop()
@@ -191,11 +208,32 @@ namespace Program
             while (gameState == "mainMenu")
             {
                 // TODO: Main Menu
+                if (Console.KeyAvailable)
+                {
+                    string key = Console.ReadKey(true).Key;
+                    if (key == Console)
+                }
+
             }
 
             while (gameState == "running")
             {
                 long currentTime = Stopwatch.GetTimestamp() / TimeSpan.TicksPerMillisecond;
+
+                // Render Stats
+                Console.ForegroundColor = ConsoleColor.Red;
+                string life = "";
+                for (int i = 0; i < 5; i++) life += (i < player.life) ? "❤" : "  ";
+                writeAt(gridWidth + statsLeftPadding, statsTopPadding, "Life: " + life);
+                Console.ResetColor();
+
+                Console.ForegroundColor = ConsoleColor.White;
+                writeAt(gridWidth + statsLeftPadding, statsTopPadding + 2, "Time: " + gameTime);
+                Console.ResetColor();
+
+                Console.ForegroundColor = ConsoleColor.White;
+                writeAt(gridWidth + statsLeftPadding, statsTopPadding + 4, "Score: " + player.score);
+                Console.ResetColor();
 
                 // Every 50ms
                 if (currentTime - playerTimer >= 50)
@@ -307,8 +345,9 @@ namespace Program
                                 // If the position it moves is a player, trigger the lose condition.
                                 if (isPlayer(x, y))
                                 {
-                                    loseLife();
-                                    
+                                    player.life--;
+                                    Console.Beep();
+
                                     // If player doesn't have any more lifes, the game needs to stop (todo) and end screen needs to start.
                                     if (player.life == 0)
                                     {
@@ -336,6 +375,8 @@ namespace Program
                     }
                     enemyTimer = currentTime;
                 }
+
+                gameTime += Stopwatch.GetTimestamp() / TimeSpan.TicksPerSecond - currentTime / 1000;
             }
 
             while (gameState == "endScreen")
@@ -439,16 +480,6 @@ namespace Program
         {
             grid[y, x] = val;
             writeAt(x, y, val);
-        }
-        
-        public static void loseLife()
-        {
-            // Decrease the life and do a quick beep to notice the player.
-            player.life--;
-            Console.Beep();
-
-            Console.SetCursorPosition(2 * (leftPadding + gridWidth + statsLeftPadding + 2 + player.life), topPadding + statsTopPadding);
-            Console.Write("  ");
         }
 
         // Player Movement
@@ -596,6 +627,7 @@ namespace Program
                     break;
                 }
             }
+            // Console.Beep();
         }
     }
 }
