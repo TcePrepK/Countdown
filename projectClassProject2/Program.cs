@@ -37,7 +37,7 @@ namespace Program
         }
 
         // Game State
-        public static string gameState = "mainMenu"; // (mainMenu, running, endScreen)
+        public static bool gameIsRunnng = false;
 
         // Board Variables
         public static int gridWidth = 53;
@@ -66,29 +66,8 @@ namespace Program
             Console.Clear();
 
             // Main Functions
-            startMainMenu();
+            startTheGame();
             mainGameLoop();
-        }
-
-        static void startMainMenu()
-        {
-            Console.SetWindowSize(100, 50);
-
-            int startX = 10;
-            int startY = 5;
-            int startWidth = 50;
-            int startHeight = 10;
-
-            for (int i = 0; i < startWidth; i++)
-            {
-                for (int j = 0; j < startHeight; j++)
-                {
-                    // Console.SetCursorPosition(i + startX, j + startY);
-                    // Console.Write(".");
-                }
-            }
-
-            // Console.SetCursorPosition(0, 0);
         }
 
         // This function sets up everything thats needed in this game. Such as walls, player and numbers.
@@ -201,22 +180,13 @@ namespace Program
             }
             while (!isEmpty(player.x, player.y));
             setGrid(player.x, player.y, 'P');
+
+            gameIsRunnng = true;
         }
 
         public static void mainGameLoop()
         {
-            while (gameState == "mainMenu")
-            {
-                // TODO: Main Menu
-                if (Console.KeyAvailable)
-                {
-                    string key = Console.ReadKey(true).Key;
-                    if (key == Console)
-                }
-
-            }
-
-            while (gameState == "running")
+            while (gameIsRunnng)
             {
                 long currentTime = Stopwatch.GetTimestamp() / TimeSpan.TicksPerMillisecond;
 
@@ -351,7 +321,7 @@ namespace Program
                                     // If player doesn't have any more lifes, the game needs to stop (todo) and end screen needs to start.
                                     if (player.life == 0)
                                     {
-                                        gameState = "endScreen";
+                                        gameIsRunnng = false;
                                     }
                                     else
                                     {
@@ -379,11 +349,7 @@ namespace Program
                 gameTime += Stopwatch.GetTimestamp() / TimeSpan.TicksPerSecond - currentTime / 1000;
             }
 
-            while (gameState == "endScreen")
-            {
-                // TODO: End screen
-                Console.SetCursorPosition(0, 1000);
-            }
+            Console.SetCursorPosition(0, 1000);
         }
 
         public static void writeAt(int x, int y, string s)
