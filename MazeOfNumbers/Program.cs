@@ -1,8 +1,4 @@
-﻿using System.Buffers.Text;
-using System.ComponentModel.Design.Serialization;
-using System.Diagnostics;
-using System.Drawing;
-using static Program.Program;
+﻿using System.Diagnostics;
 
 namespace Program
 {
@@ -10,7 +6,7 @@ namespace Program
     {
         // General Variables
         public static Random rng = new Random();
-        
+
         // Visual Variables
         public static int leftPadding = 2;
         public static int topPadding = 1;
@@ -18,7 +14,7 @@ namespace Program
         public static int statsTopPadding = 1;
         public static bool isFancy = true;
         public static ConsoleColor bgColor = ConsoleColor.Black;
-        
+
 
         // Game Variables
         public struct Player
@@ -360,7 +356,8 @@ namespace Program
                 Console.Write(s);
                 Console.ResetColor();
                 Console.BackgroundColor = ConsoleColor.DarkGray;
-            } else
+            }
+            else
             {
                 // A simple write to position function.
                 Console.SetCursorPosition(x, y);
@@ -439,7 +436,7 @@ namespace Program
         public static bool isNumber(int x, int y)
         {
             // If not empty, not wall, not player, must be a number (easier than just checking if it is a number or not)
-            return !isEmpty(x, y) && !isWall(x, y) && !isPlayer(x, y); 
+            return !isEmpty(x, y) && !isWall(x, y) && !isPlayer(x, y);
         }
 
         public static void setGrid(int x, int y, char val)
@@ -466,7 +463,8 @@ namespace Program
                     player.x = targetX;
                     player.y = targetY;
                 }
-            } else if (isEmpty(targetX, targetY))
+            }
+            else if (isEmpty(targetX, targetY))
             {
                 // If the target tile is empty, just move normally.
                 setGrid(player.x, player.y, ' ');
@@ -480,7 +478,7 @@ namespace Program
         public static bool push(int baseX, int baseY, int dx, int dy, int prevVal)
         {
             char currentChar = grid[baseY, baseX];
-            
+
             // Target position is the position of this current character wants to go.
             int targetX = baseX + dx;
             int targetY = baseY + dy;
@@ -511,15 +509,18 @@ namespace Program
                         setGrid(targetX, targetY, currentChar); // Set next position current value.
 
                         return true;
-                    } else
+                    }
+                    else
                     {
                         return false;
                     }
-                } else
+                }
+                else
                 {
                     return false;
                 }
-            } else if (isEmpty(targetX, targetY))
+            }
+            else if (isEmpty(targetX, targetY))
             {
                 // In this case, next tile is empty. So we can just move this current char, to the next position.
                 for (int i = 0; i < numberAmount; i++)
@@ -535,7 +536,8 @@ namespace Program
                 setGrid(targetX, targetY, currentChar); // Set next position current value.
 
                 return true;
-            } else
+            }
+            else
             {
                 // In this case, next tile is a wall. We now need to check if this is the first number to get pushed (P5#) or if there has been more than one (P52#)
                 // PrevVal is the value of the tile thats pushing this current one. It can be 10 ONLY IF it is a player.
@@ -546,7 +548,8 @@ namespace Program
                     // Not the first number to get pushed.
                     crushNumber(baseX, baseY);
                     return true;
-                } else
+                }
+                else
                 {
                     // First number to get pushed.
                     return false;
@@ -577,19 +580,21 @@ namespace Program
 
                     setGrid(x, y, ' ');
                     setGrid(numbers[i].x, numbers[i].y, Convert.ToChar(numbers[i].val + '0'));
-                    
+
                     // Give score to the player depending on the number.
                     if (crushedValue == 0)
                     {
                         player.score += 20;
-                    } else if (crushedValue < 5)
+                    }
+                    else if (crushedValue < 5)
                     {
                         player.score += 2;
-                    } else
+                    }
+                    else
                     {
                         player.score += 1;
                     }
-                    
+
                     break;
                 }
             }
